@@ -6,41 +6,11 @@
 /*   By: albelmon <albelmon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 10:35:36 by albelmon          #+#    #+#             */
-/*   Updated: 2025/11/05 15:49:57 by albelmon         ###   ########.fr       */
+/*   Updated: 2025/11/11 18:16:20 by albelmon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
-//En line quiero guardar el resto del archivo. Lo mueestro con buffer y almaceno el resto en line.
-char	*get_next_line(int fd)
-{
-	static char	*rest;
-	char		*line;
-	char		*buffer;
-	size_t		i;
-	size_t		n_bytes;
-	
-	//Comprobación de argumentos
-	if (fd <= 0 || BUFFER_SIZE <= 0)
-		return (NULL);
-	i = 0;
-	//Reserva de espacio con malloc para el buffer. Del tamaño que nos indiquen
-	buffer = malloc(BUFFER_SIZE);
-	if (!buffer)
-		return (NULL);
-	//Inicialización de la variable estatica del contenido que ya hemos leido. En la primera lectura deberá de ser null
-	if (rest == NULL)
-		rest = "";
-	//Lógica
-	n_bytes = read(fd, buffer, BUFFER_SIZE);
-	while (ft_line_found(buffer, n_bytes) == -1)
-		ft_strlcpy(line, buffer, n_bytes + 1);
-	line[n_bytes + 1] = '\0';
-	free(buffer);
-	return (line);
-}
-
 
 //Funcion que mira si hay un salto de linea dentro del buffersize indicado
 //Retorna -1 si NO ha encontrado un salto de linea dentro del buffer en los bytes indicados
@@ -50,34 +20,60 @@ static int	ft_line_found(char *buffer, int n_bytes)
 	int	i;
 
 	i = 0;
-	while (i > n_bytes)
+	while (i < n_bytes)
 	{
-		if (buffer[i] != '\n')
+		if (buffer[i] == '\n')
 			return (i);
 		i++;
 	}
 	return (-1);
 }
 
+char	*get_next_line(int fd)
+{
+	static char	*rest;
+	char		*line;
+	char		*buffer;
+	int			jump;
+	size_t		n_bytes;
+	
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	buffer = malloc(BUFFER_SIZE + 1);
+	if (!buffer)
+		return (NULL);
+	//Es la forma terniaria
+	line = rest ? ft_strdup(rest) : ft_strdup("");
+	//De esto:
+	if (rest)
+		line = ft_strdup(rest);
+	else
+		line = ft_strdup("");
+	free(rest);
+	rest = NULL;
+	while ((n_bytes = read(fd, buffer, BUFFER_SIZE)) > 0)
+	{
+		buffer[n_bytes] = '\0';
+		line = ft_strjoin(line, buffer);
+		jump = ft_line_found(line, ft_strlen(line));
+		if (jump >= 0)
+		{
+			rest = ft_strdup(line + jump + 1);
+			line[jump + 1] = '\0';
+			break;
+		}
+	}
+	free(buffer);
+	if (ft_strlen(line) == 0)
+	{
+		free(line);
+		return (NULL);
+	}
+	return (line);
+}
+
 //Calcular el numero de veces que hay que hacer read.
 //Lector de una linea de un archivo.
-/* int	main(void)
-{
-	int		fd;
-	char	*gnl;
-	int		i = 0;
-
-	fd = open("ejemplo.txt", O_RDONLY);
-	gnl = get_next_line(fd);
-	while (i < 3)
-	{
-		printf("%s\n", gnl);
-		gnl = get_next_line(fd);
-		free(gnl);
-		i++;
-	}
-} */
-
 int	main(void)
 {
 	int		fd;
@@ -85,7 +81,11 @@ int	main(void)
 
 	fd = open("ejemplo.txt", O_RDONLY);
 	gnl = get_next_line(fd);
-
-	printf("%s\n", gnl);
-	free(gnl);
+	while (gnl != NULL)
+	{
+		printf("%s", gnl);
+		free(gnl);
+		gnl = get_next_line(fd);
+	}
+	close(fd);
 }
