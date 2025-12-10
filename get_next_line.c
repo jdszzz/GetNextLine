@@ -6,14 +6,15 @@
 /*   By: albelmon <albelmon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 10:35:36 by albelmon          #+#    #+#             */
-/*   Updated: 2025/11/11 18:16:20 by albelmon         ###   ########.fr       */
+/*   Updated: 2025/12/10 17:23:57 by albelmon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
 //Funcion que mira si hay un salto de linea dentro del buffersize indicado
-//Retorna -1 si NO ha encontrado un salto de linea dentro del buffer en los bytes indicados
+//Retorna -1 si NO ha encontrado un salto de linea dentro del buffer en 
+//los bytes indicados
 //Si ha encontrado un salto de linea, retorna la posición en la que está.
 static int	ft_line_found(char *buffer, int n_bytes)
 {
@@ -29,41 +30,46 @@ static int	ft_line_found(char *buffer, int n_bytes)
 	return (-1);
 }
 
-char	*get_next_line(int fd)
+char	*ft_read_until_newline(int fd, char *line, char **rest)
 {
-	static char	*rest;
-	char		*line;
-	char		*buffer;
-	int			jump;
-	size_t		n_bytes;
-	
-	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (NULL);
+	size_t	n_bytes;
+	int		jump;
+	char	*buffer;
+
 	buffer = malloc(BUFFER_SIZE + 1);
 	if (!buffer)
 		return (NULL);
-	//Es la forma terniaria
-	line = rest ? ft_strdup(rest) : ft_strdup("");
-	//De esto:
-	if (rest)
-		line = ft_strdup(rest);
-	else
-		line = ft_strdup("");
-	free(rest);
-	rest = NULL;
-	while ((n_bytes = read(fd, buffer, BUFFER_SIZE)) > 0)
+	n_bytes = read(fd, buffer, BUFFER_SIZE);
+	while (n_bytes > 0)
 	{
 		buffer[n_bytes] = '\0';
 		line = ft_strjoin(line, buffer);
 		jump = ft_line_found(line, ft_strlen(line));
 		if (jump >= 0)
 		{
-			rest = ft_strdup(line + jump + 1);
+			*rest = ft_strdup(line + jump + 1);
 			line[jump + 1] = '\0';
-			break;
+			break ;
 		}
 	}
 	free(buffer);
+	return (line);
+}
+
+char	*get_next_line(int fd)
+{
+	static char	*rest;
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	if (rest)
+		line = ft_strdup(rest);
+	else
+		line = ft_strdup("");
+	free(rest);
+	rest = NULL;
+	line = ft_read_until_newline(fd, line, &rest);
 	if (ft_strlen(line) == 0)
 	{
 		free(line);
