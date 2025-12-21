@@ -1,1 +1,0 @@
-Llamar a la función get_next_line de manera

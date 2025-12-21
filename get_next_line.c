@@ -6,7 +6,7 @@
 /*   By: albelmon <albelmon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 10:35:36 by albelmon          #+#    #+#             */
-/*   Updated: 2025/12/10 17:23:57 by albelmon         ###   ########.fr       */
+/*   Updated: 2025/12/21 16:13:49 by albelmon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ char	*ft_read_until_newline(int fd, char *line, char **rest)
 			line[jump + 1] = '\0';
 			break ;
 		}
+		n_bytes = read(fd, buffer, BUFFER_SIZE);
 	}
 	free(buffer);
 	return (line);
