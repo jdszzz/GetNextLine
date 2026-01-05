@@ -6,7 +6,7 @@
 /*   By: albelmon <albelmon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 10:36:16 by albelmon          #+#    #+#             */
-/*   Updated: 2025/12/10 17:11:05 by albelmon         ###   ########.fr       */
+/*   Updated: 2026/01/05 16:23:04 by albelmon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,10 @@ char	*ft_strjoin(char *s1, char *s2)
 	size_t	len_s2;
 	char	*s3;
 
-	if (!s1 || !s2)
+	if (!s2)
 		return (NULL);
+	if (!s1)
+		s1 = ft_strdup("");
 	len_s1 = ft_strlen(s1);
 	len_s2 = ft_strlen(s2);
 	s3 = malloc(len_s1 + len_s2 + 1);
