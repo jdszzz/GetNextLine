@@ -6,7 +6,7 @@
 /*   By: albelmon <albelmon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/30 10:36:19 by albelmon          #+#    #+#             */
-/*   Updated: 2025/11/11 17:41:08 by albelmon         ###   ########.fr       */
+/*   Updated: 2026/01/07 02:34:24 by albelmon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,10 @@
 
 # include <stdlib.h>
 # include <unistd.h>
-# include <fcntl.h>
-# include <stdio.h>
 
 char	*get_next_line(int fd);
-size_t	ft_strlcpy(char *dest, const char *src, size_t size);
 size_t	ft_strlen(const char *str);
-char	*ft_strdup(const char *s);
 char	*ft_strjoin(char *s1, char *s2);
+char	*ft_strchr(const char *s, int c);
 
 #endif

@@ -5,98 +5,107 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: albelmon <albelmon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/05 17:11:09 by albelmon          #+#    #+#             */
-/*   Updated: 2026/01/05 17:13:13 by albelmon         ###   ########.fr       */
+/*   Created: 2026/01/06 16:34:27 by albelmon          #+#    #+#             */
+/*   Updated: 2026/01/07 02:35:26 by albelmon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-// Busca '\n' en los primeros n_bytes de buffer, devuelve posición o -1
-static int	ft_line_found(char *buffer, ssize_t n_bytes)
+/* Extrae y devuelve la línea completa 
+(hasta el \n o final) del buffer acumulado */
+static char	*ft_extract_line(char *rest)
 {
-	ssize_t	i;
+	char	*line;
+	int		i;
 
 	i = 0;
-	while (i < n_bytes)
-	{
-		if (buffer[i] == '\n')
-			return (i);
-		i++;
-	}
-	return (-1);
-}
-
-static char	*ft_extract_rest(char *line, char **rest, int jump)
-{
-	*rest = ft_strdup(line + jump + 1);
-	if (!*rest)
-	{
-		free(line);
+	if (!rest[i])
 		return (NULL);
-	}
-	line[jump + 1] = '\0';
-	return (line);
-}
-
-static char	*ft_process_buffer(char *line, char *buffer, char **rest)
-{
-	int	jump;
-
-	line = ft_strjoin(line, buffer);
+	while (rest[i] && rest[i] != '\n')
+		i++;
+	line = malloc(i + (rest[i] == '\n') + 1);
 	if (!line)
 		return (NULL);
-	jump = ft_line_found(line, ft_strlen(line));
-	if (jump >= 0)
-		return (ft_extract_rest(line, rest, jump));
-	return (line);
-}
-
-static char	*ft_read_until_newline(int fd, char *line, char **rest)
-{
-	ssize_t	n_bytes;
-	char	*buffer;
-
-	buffer = malloc(BUFFER_SIZE + 1);
-	if (!buffer)
-		return (NULL);
-	n_bytes = 1;
-	while (n_bytes > 0 && !(*rest))
+	i = 0;
+	while (rest[i] && rest[i] != '\n')
 	{
-		n_bytes = read(fd, buffer, BUFFER_SIZE);
-		if (n_bytes == -1)
-		{
-			free(buffer);
-			free(line);
-			return (NULL);
-		}
-		buffer[n_bytes] = '\0';
-		line = ft_process_buffer(line, buffer, rest);
-		if (!line)
-			break ;
+		line[i] = rest[i];
+		i++;
 	}
-	free(buffer);
+	if (rest[i] == '\n')
+		line[i++] = '\n';
+	line[i] = '\0';
 	return (line);
 }
 
+/* Elimina la línea ya leída y guarda el contenido 
+restante para la siguiente llamada */
+static char	*ft_save_rest(char *rest)
+{
+	char	*new_rest;
+	int		i;
+	int		j;
+
+	i = 0;
+	while (rest[i] && rest[i] != '\n')
+		i++;
+	if (!rest[i])
+		return (free(rest), NULL);
+	new_rest = malloc(ft_strlen(rest) - i + 1);
+	if (!new_rest)
+		return (free(rest), NULL);
+	i++;
+	j = 0;
+	while (rest[i])
+		new_rest[j++] = rest[i++];
+	new_rest[j] = '\0';
+	free(rest);
+	return (new_rest);
+}
+
+/* Lee del fd y acumula el contenido en 'rest' 
+hasta encontrar un salto de línea o EOF */
+static char	*ft_read_to_rest(int fd, char *rest)
+{
+	char	*buf;
+	char	*tmp;
+	ssize_t	n_bytes;
+
+	buf = malloc((size_t)BUFFER_SIZE + 1);
+	if (!buf)
+		return (free(rest), NULL);
+	n_bytes = 1;
+	while (!ft_strchr(rest, '\n') && n_bytes != 0)
+	{
+		n_bytes = read(fd, buf, BUFFER_SIZE);
+		if (n_bytes == -1)
+			return (free(buf), free(rest), NULL);
+		buf[n_bytes] = '\0';
+		tmp = ft_strjoin(rest, buf);
+		if (!tmp)
+			return (free(buf), NULL);
+		rest = tmp;
+	}
+	free(buf);
+	return (rest);
+}
+
+/* Función principal que gestiona la lectura, 
+extracción y guardado de la línea */
 char	*get_next_line(int fd)
 {
 	static char	*rest;
 	char		*line;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (free(rest), rest = NULL, NULL);
+	rest = ft_read_to_rest(fd, rest);
+	if (!rest)
 		return (NULL);
-	if (rest)
-		line = ft_strdup(rest);
-	else
-		line = ft_strdup("");
-	free(rest);
-	rest = NULL;
-	line = ft_read_until_newline(fd, line, &rest);
-	if (!line || line[0] == '\0')
-	{
-		free(line);
-		return (NULL);
-	}
+	line = ft_extract_line(rest);
+	if (!line)
+		return (free(rest), rest = NULL, NULL);
+	rest = ft_save_rest(rest);
 	return (line);
 }
