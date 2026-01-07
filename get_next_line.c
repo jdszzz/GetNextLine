@@ -6,14 +6,12 @@
 /*   By: albelmon <albelmon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/06 16:34:27 by albelmon          #+#    #+#             */
-/*   Updated: 2026/01/07 02:35:26 by albelmon         ###   ########.fr       */
+/*   Updated: 2026/01/07 16:38:00 by albelmon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-/* Extrae y devuelve la línea completa 
-(hasta el \n o final) del buffer acumulado */
 static char	*ft_extract_line(char *rest)
 {
 	char	*line;
@@ -39,8 +37,6 @@ static char	*ft_extract_line(char *rest)
 	return (line);
 }
 
-/* Elimina la línea ya leída y guarda el contenido 
-restante para la siguiente llamada */
 static char	*ft_save_rest(char *rest)
 {
 	char	*new_rest;
@@ -64,8 +60,6 @@ static char	*ft_save_rest(char *rest)
 	return (new_rest);
 }
 
-/* Lee del fd y acumula el contenido en 'rest' 
-hasta encontrar un salto de línea o EOF */
 static char	*ft_read_to_rest(int fd, char *rest)
 {
 	char	*buf;
@@ -91,8 +85,6 @@ static char	*ft_read_to_rest(int fd, char *rest)
 	return (rest);
 }
 
-/* Función principal que gestiona la lectura, 
-extracción y guardado de la línea */
 char	*get_next_line(int fd)
 {
 	static char	*rest;
