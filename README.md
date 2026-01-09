@@ -15,19 +15,21 @@ Main de prueba:
 
 int main(void)
 {
-    int     fd;
-    char    *gnl;
+	int     fd;
+	char    *gnl;
 
-    fd = open("README.md", O_RDONLY);
-    gnl = get_next_line(fd);
- while (gnl != NULL)
-    {
-    	printf("%s", gnl);
-        free(gnl);
-        gnl = get_next_line(fd);
-    }
-    close(fd);
+	fd = open("larga.txt", O_RDONLY);
+	//fd = 42;
+	gnl = get_next_line(fd);
+	while (gnl != NULL)
+	{
+		printf("%s", gnl);
+		free(gnl);
+		gnl = get_next_line(fd);
+	}
+	close(fd);
 }
+Generar una línea de más de 2000 carácteres: python3 -c "print('HOLA' * 625)" > prueba.txt
 
 Recursos
 P2P. Tutoriales de YT sobre variables estáticas. He utilizado IA para solucionar dudas concretas, revisión general del código y creación de main exhaustivo.
