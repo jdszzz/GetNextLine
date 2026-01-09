@@ -8,6 +8,26 @@ El objetivo de este proyecto es programar una función que devuelva una línea l
 Instrucciones
 Compilación: cc -Wall -Werror -Wextra -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c main.c
 Ejecución: ./a.out
+Main de prueba:
+#include "get_next_line.h"
+#include <fcntl.h>
+#include <stdio.h>
+
+int main(void)
+{
+    int     fd;
+    char    *gnl;
+
+    fd = open("README.md", O_RDONLY);
+    gnl = get_next_line(fd);
+ while (gnl != NULL)
+    {
+    	printf("%s", gnl);
+        free(gnl);
+        gnl = get_next_line(fd);
+    }
+    close(fd);
+}
 
 Recursos
 P2P. Tutoriales de YT sobre variables estáticas. He utilizado IA para solucionar dudas concretas, revisión general del código y creación de main exhaustivo.
